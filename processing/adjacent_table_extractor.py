@@ -107,22 +107,26 @@ def extract_required_data(table_text: str) -> Dict[str, Any]:
 
     Extract:
     - revision_number
-    - document_title
     - document_numbers
 
     Rules:
     - Extract ALL document numbers in the table
 
-    - For revision_numbers:
+    - For revision_number:
     1. Prefer the COMPANY REVISION CODE if explicitly mentioned (e.g., "Company Rev", "Client Rev", "Company Revision")
     2. If latest company revision is NOT present, extract the latest revision code available in the table
     3. Latest revision = most recent entry
+
+    - For document_numbers:
+    1. Document numbers are not present in Document Title so, do not confuse with it.
+    2. They may be present in Document Ids.
+    3. They may be present as just No.
+    4. Use your knowledge of what a P&ID document number looks like.
 
     Return ONLY valid JSON in this exact format:
 
     {{
     "revision_number": "",
-    "document_title": "",
     "document_numbers": []
     }}
 
@@ -205,7 +209,6 @@ def extract_required_data_from_dataframe(df: pd.DataFrame) -> Dict[str, Any]:
         "status": "ok",
         "data": {
             "revision_number": revision_number,
-            "document_title": document_title,
             "document_numbers": normalized_document_numbers,
         },
     }
