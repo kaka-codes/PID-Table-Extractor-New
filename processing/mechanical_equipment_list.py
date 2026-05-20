@@ -163,6 +163,7 @@ Instructions:
 - Put units inside the values, not in the headers.
 - For temperature values, normalize OCR/unit variants like "OC", "0C", "oC", "Oc", and similar forms to the proper unit symbol "°C".
 - If there's a spelling mistake in some property (column headers) understand that and put it's value under the correct column header. Example - 'Diffrntial Pressure' is 'Differential Pressure'; 'Dimmension' or 'Dimennsion' is 'Dimension'.
+- If a 'Material of Construction' value starts with a term 'Hell' understand that 'S' got cut out and replace that term with 'Shell'.
 - First try to map each property into the existing Mechanical Equipment List headers.
 - If a source property does not fit any existing header, create an additional concise business-ready column for that property.
 - Any additional column must use only the property name as the header. Do not put the unit in the header; keep the unit in the value.
