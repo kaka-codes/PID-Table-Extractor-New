@@ -237,11 +237,9 @@ def _ordered_mechanical_columns(rows: List[Dict[str, str]]) -> List[str]:
                 continue
             extra_columns.append(column)
 
-    ordered_columns = [
-        header for header in MECHANICAL_TEMPLATE_HEADERS if header != DOCUMENT_NUMBERS_HEADER
-    ]
+    ordered_columns = list(MECHANICAL_TEMPLATE_HEADERS)
     ordered_columns.extend(extra_columns)
-    ordered_columns.append(DOCUMENT_NUMBERS_HEADER)
+
     return ordered_columns
 
 
