@@ -28,9 +28,7 @@ MECHANICAL_TEMPLATE_HEADERS = [
     "ABSORBED POWER",
     "DESIGN CODE",
     "DIFFERENTIAL PRESSURE",
-    "DOCUMENT NUMBERS",
 ]
-DOCUMENT_NUMBERS_HEADER = "DOCUMENT NUMBERS"
 
 MECHANICAL_MODEL_CANDIDATES = [
     "gemini-3.1-flash-lite",
@@ -167,12 +165,10 @@ Instructions:
 - First try to map each property into the existing Mechanical Equipment List headers.
 - If a source property does not fit any existing header, create an additional concise business-ready column for that property.
 - Any additional column must use only the property name as the header. Do not put the unit in the header; keep the unit in the value.
-- Keep the standard Mechanical Equipment List headers unchanged, but you may add extra property columns when needed, but no units should be present in the column headers. Units should get appended to the values if needed.
+- Keep the standard Mechanical Equipment List headers unchanged, and do not change the order of the columns, but you may add extra property columns when needed, but no units should be present in the column headers. Units should get appended to the values if needed.
 - If a value is missing or uncertain, return an empty string for that field.
 - "CONTRACTOR EQUIPMENT TAG NO." should usually come from item/equipment tag or item number identifiers.
-- "P&ID" should be populated from document_title whenever document_title is available.
-- 
-- "DOCUMENT NUMBERS" should be a comma-separated string if multiple document numbers exist, and it should remain the last column after any extra property columns are inserted before it.
+- "P&ID" should be populated from document_numbers whenever document_numbers is available.
 - Keep values concise and business-ready.
 - Return JSON only, with this shape. Extra property columns may also appear in each row object when needed:
 {{
@@ -196,8 +192,7 @@ Instructions:
       "DUTY": "",
       "ABSORBED POWER": "",
       "DESIGN CODE": "",
-      "DIFFERENTIAL PRESSURE": "",
-      "DOCUMENT NUMBERS": ""
+      "DIFFERENTIAL PRESSURE": ""
     }}
   ]
 }}
