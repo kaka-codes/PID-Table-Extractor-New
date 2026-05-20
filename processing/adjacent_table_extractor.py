@@ -121,7 +121,6 @@ def extract_required_data(table_text: str) -> Dict[str, Any]:
     1. Document numbers are not present in Document Title so, do not confuse with it.
     2. They may be present in Document Ids.
     3. They may be present as just No.
-    4. Use your knowledge of what a P&ID document number looks like.
 
     Return ONLY valid JSON in this exact format:
 
