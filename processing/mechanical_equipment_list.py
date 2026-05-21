@@ -24,12 +24,19 @@ MECHANICAL_TEMPLATE_HEADERS = [
     "DESIGN TEMPERATURE",
     "DESIGN CAPACITY",
     "DIMENSION",
+    "L or T/T",
+    "W or ID",
+    "H or T/T",
     "DUTY",
     "ABSORBED POWER",
     "DESIGN CODE",
     "DIFFERENTIAL PRESSURE",
+    "DRY WT (each)",
+    "OPE WT (each)",
+    "DRY WT (total)",
+    "OPE WT (total)",
+    "REMARKS",
 ]
-
 MECHANICAL_MODEL_CANDIDATES = [
     "gemini-3.1-flash-lite",
 ]
@@ -160,17 +167,46 @@ Instructions:
 - Use document-level fields like document_title, source_file, revision_number, document_numbers, page_number, table_number, and split_number when helpful.
 - Put units inside the values, not in the headers.
 - For temperature values, normalize OCR/unit variants like "OC", "0C", "oC", "Oc", and similar forms to the proper unit symbol "°C".
-- If there's a spelling mistake in some property (column headers) understand that and put it's value under the correct column header. Example - 'Diffrntial Pressure' is 'Differential Pressure'; 'Dimmension' or 'Dimennsion' is 'Dimension'.
+- If there's a spelling mistake in some property (column headers) understand that and put its value under the correct column header.
+  Example:
+  - 'Diffrntial Pressure' means 'Differential Pressure'
+  - 'Dimmension' or 'Dimennsion' means 'Dimension'
 - If a 'Material of Construction' value starts with a term 'Hell' understand that 'S' got cut out and replace that term with 'Shell'.
 - First try to map each property into the existing Mechanical Equipment List headers.
 - If a source property does not fit any existing header, create an additional concise business-ready column for that property.
-- Any additional column must use only the property name as the header. Do not put the unit in the header; keep the unit in the value.
-- Keep the standard Mechanical Equipment List headers unchanged, and do not change the order of the columns, but you may add extra property columns when needed, but no units should be present in the column headers. Units should get appended to the values if needed.
+- Any additional column must use only the property name as the header.
+- Do not put the unit in the header; keep the unit in the value.
+- Keep the standard Mechanical Equipment List headers unchanged.
+- Do not change the order of the columns.
+- You may add extra property columns when needed, but all additional columns must be inserted before the following fixed columns:
+  "DRY WT (each)",
+  "OPE WT (each)",
+  "DRY WT (total)",
+  "OPE WT (total)",
+  and "REMARKS".
+- These last five columns must always remain present at the end of the table and must always remain empty.
+- No units should be present in the column headers.
+- Units should get appended to the values if needed.
 - If a value is missing or uncertain, return an empty string for that field.
 - "CONTRACTOR EQUIPMENT TAG NO." should usually come from item/equipment tag or item number identifiers.
-- "P&ID" should be populated from document_numbers whenever document_numbers is available.
+- "P&ID" should be populated only from document_numbers whenever document_numbers is available.
 - Keep values concise and business-ready.
-- Return JSON only, with this shape. Extra property columns may also appear in each row object when needed:
+
+IMPORTANT RULES FOR THE FOLLOWING COLUMNS:
+- "DRY WT (each)" must ALWAYS remain blank.
+- "OPE WT (each)" must ALWAYS remain blank.
+- "DRY WT (total)" must ALWAYS remain blank.
+- "OPE WT (total)" must ALWAYS remain blank.
+- "REMARKS" must ALWAYS remain blank.
+- Never infer, calculate, estimate, or populate values for these five columns even if the source data contains related information.
+
+Dimension Mapping Rules:
+- Map Length or Tangent-to-Tangent values into "L or T/T".
+- Map Width or Internal Diameter values into "W or ID".
+- Map Height or Tangent-to-Tangent height values into "H or T/T".
+- Keep dimension units inside the values.
+
+Return JSON only, with this shape. Extra property columns may also appear in each row object when needed:
 {{
   "rows": [
     {{
@@ -189,10 +225,18 @@ Instructions:
       "DESIGN TEMPERATURE": "",
       "DESIGN CAPACITY": "",
       "DIMENSION": "",
+      "L or T/T": "",
+      "W or ID": "",
+      "H or T/T": "",
       "DUTY": "",
       "ABSORBED POWER": "",
       "DESIGN CODE": "",
-      "DIFFERENTIAL PRESSURE": ""
+      "DIFFERENTIAL PRESSURE": "",
+      "DRY WT (each)": "",
+      "OPE WT (each)": "",
+      "DRY WT (total)": "",
+      "OPE WT (total)": "",
+      "REMARKS": ""
     }}
   ]
 }}
@@ -231,17 +275,37 @@ def _normalize_mechanical_row(raw_row: Dict[str, Any]) -> Dict[str, str]:
 def _ordered_mechanical_columns(rows: List[Dict[str, str]]) -> List[str]:
     extra_columns: List[str] = []
 
+    fixed_tail_columns = [
+        "DRY WT (each)",
+        "OPE WT (each)",
+        "DRY WT (total)",
+        "OPE WT (total)",
+        "REMARKS",
+    ]
+
+    base_columns = [
+        column
+        for column in MECHANICAL_TEMPLATE_HEADERS
+        if column not in fixed_tail_columns
+    ]
+
     for row in rows:
         for column in row.keys():
-            if column in MECHANICAL_TEMPLATE_HEADERS or column in extra_columns:
+            if (
+                column in MECHANICAL_TEMPLATE_HEADERS
+                or column in extra_columns
+            ):
                 continue
+
             extra_columns.append(column)
 
-    ordered_columns = list(MECHANICAL_TEMPLATE_HEADERS)
-    ordered_columns.extend(extra_columns)
+    ordered_columns = (
+        base_columns
+        + extra_columns
+        + fixed_tail_columns
+    )
 
     return ordered_columns
-
 
 @lru_cache(maxsize=128)
 def _map_payload_json_to_mechanical_rows(payload_json: str) -> Tuple[List[Dict[str, str]], str]:
