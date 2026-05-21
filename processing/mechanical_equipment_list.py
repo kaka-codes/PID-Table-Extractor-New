@@ -188,6 +188,21 @@ Instructions:
   "OPE WT (total)",
   and "REMARKS".
 - These last five columns must always remain present at the end of the table and must always remain empty.
+
+Duty Mapping Rules:
+- Only generic equipment duty values should be mapped into the "DUTY" column.
+
+- If a property is specifically named:
+  - "Motor Duty"
+  - "Process Design Duty"
+  - or any other specifically qualified duty name,
+
+  then DO NOT place those values into the generic "DUTY" column.
+
+- Instead:
+  - Create a separate column using the exact business property name.
+  - No units should be present in the column header.
+  - Append units to the value instead.
 - No units should be present in the column headers.
 - Units should get appended to the values if needed.
 - If a value is missing or uncertain, return an empty string for that field.
@@ -204,10 +219,32 @@ IMPORTANT RULES FOR THE FOLLOWING COLUMNS:
 - Never infer, calculate, estimate, or populate values for these five columns even if the source data contains related information.
 
 Dimension Mapping Rules:
-- Map Length values into "L or T/T".
-- Map Width or Internal Diameter values into "W or ID".
-- Map Height values into "H or T/T".
-- Keep dimension units inside the values.
+- If dimension text contains identifiers like:
+  "ID", "I/D", "OD", "O/D", or "D",
+  then extract that value and place it into the "W or ID" column.
+
+- Preserve the identifier along with the value.
+  Examples:
+  - "1700 mm (ID)"
+  - "812.8 mm (O/D)"
+
+- For the remaining dimension value:
+  - If equipment ORIENTATION is Horizontal, place the value into "L or T/T".
+  - If equipment ORIENTATION is Vertical, place the value into "H or T/T".
+
+- Preserve associated identifiers such as:
+  "T/T", "S/F", "F/F", etc. together with the value.
+
+Examples:
+- "5500 mm (T/T)"
+- "1450 mm (S/F)"
+
+- If ORIENTATION is unavailable or unclear:
+  - Prefer mapping the remaining non-diameter dimension into "L or T/T".
+  - Leave "H or T/T" empty unless clearly vertical equipment data is present.
+
+- Keep all units inside the values.
+- Do not place units or identifiers in the column headers.
 
 Return JSON only, with this shape. Extra property columns may also appear in each row object when needed:
 {{
