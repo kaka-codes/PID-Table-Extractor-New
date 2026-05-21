@@ -188,21 +188,7 @@ Instructions:
   "OPE WT (total)",
   and "REMARKS".
 - These last five columns must always remain present at the end of the table and must always remain empty.
-
-Duty Mapping Rules:
-- Only generic equipment duty values should be mapped into the "DUTY" column.
-
-- If a property is specifically named:
-  - "Motor Duty"
-  - "Process Design Duty"
-  - or any other specifically qualified duty name,
-
-  then DO NOT place those values into the generic "DUTY" column.
-
-- Instead:
-  - Create a separate column using the exact business property name.
-  - No units should be present in the column header.
-  - Append units to the value instead.
+- If there is a property specifically as Motor Duty then that value should be put in the "MOTOR DUTY" column. But make sure the units should never be displayed in the column header. units should be appended with the values.
 - No units should be present in the column headers.
 - Units should get appended to the values if needed.
 - If a value is missing or uncertain, return an empty string for that field.
