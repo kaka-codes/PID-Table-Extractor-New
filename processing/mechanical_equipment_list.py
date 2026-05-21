@@ -188,7 +188,7 @@ Instructions:
   "OPE WT (total)",
   and "REMARKS".
 - These last five columns must always remain present at the end of the table and must always remain empty.
-- If there is a property specifically as Motor Duty then that value should be put in the "MOTOR DUTY" column. But make sure the units should never be displayed in the column header. units should be appended with the values.
+- If there is a property specifically as Motor Duty then that value should be put in the "MOTOR DUTY" column. Else put rest other Duty in the 'DUTY' column. 
 - No units should be present in the column headers.
 - Units should get appended to the values if needed.
 - If a value is missing or uncertain, return an empty string for that field.
