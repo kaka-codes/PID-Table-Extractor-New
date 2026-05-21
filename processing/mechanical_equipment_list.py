@@ -17,6 +17,7 @@ MECHANICAL_TEMPLATE_HEADERS = [
     "P&ID",
     "MATERIAL OF CONSTRUCTION",
     "CONFIGURATION",
+    "ORIENTATION",
     "LOCATION",
     "OPERATING PRESSURE",
     "OPERATING TEMPERATURE",
@@ -167,18 +168,20 @@ Instructions:
 - Use document-level fields like document_title, source_file, revision_number, document_numbers, page_number, table_number, and split_number when helpful.
 - Put units inside the values, not in the headers.
 - For temperature values, normalize OCR/unit variants like "OC", "0C", "oC", "Oc", and similar forms to the proper unit symbol "°C".
+- If '(1 × 100%)', '(2 × 100%)', '(3 × 33%)', etc. kind of % values are present in "DESCRIPTION", "EQUIPMENT TYPE", "PRODUCT/ SERVICE" properties then understand that those % values should be put in the "CONFIGURATION" column.
+- If the words 'Vertical' or 'Horizontal' are present in "DESCRIPTION", "EQUIPMENT TYPE", "PRODUCT/ SERVICE" properties then understand that 'vertical' or 'horizontal' should be put in the "ORIENTATION" column
 - If there's a spelling mistake in some property (column headers) understand that and put its value under the correct column header.
   Example:
   - 'Diffrntial Pressure' means 'Differential Pressure'
   - 'Dimmension' or 'Dimennsion' means 'Dimension'
 - If a 'Material of Construction' value starts with a term 'Hell' understand that 'S' got cut out and replace that term with 'Shell'.
 - First try to map each property into the existing Mechanical Equipment List headers.
-- If a source property does not fit any existing header, create an additional concise business-ready column for that property.
-- Any additional column must use only the property name as the header.
+- If a source property does not fit any existing header, create an additional concise business-ready column for that property, but without units, those units need to be appended to the values.
+- Any additional column must use only the property name as the header (no units).
 - Do not put the unit in the header; keep the unit in the value.
 - Keep the standard Mechanical Equipment List headers unchanged.
 - Do not change the order of the columns.
-- You may add extra property columns when needed, but all additional columns must be inserted before the following fixed columns:
+- You may add extra property columns when needed, but all additional columns must be inserted without units (units get appended to the values) and before the following fixed columns:
   "DRY WT (each)",
   "OPE WT (each)",
   "DRY WT (total)",
@@ -201,9 +204,9 @@ IMPORTANT RULES FOR THE FOLLOWING COLUMNS:
 - Never infer, calculate, estimate, or populate values for these five columns even if the source data contains related information.
 
 Dimension Mapping Rules:
-- Map Length or Tangent-to-Tangent values into "L or T/T".
+- Map Length values into "L or T/T".
 - Map Width or Internal Diameter values into "W or ID".
-- Map Height or Tangent-to-Tangent height values into "H or T/T".
+- Map Height values into "H or T/T".
 - Keep dimension units inside the values.
 
 Return JSON only, with this shape. Extra property columns may also appear in each row object when needed:
@@ -218,6 +221,7 @@ Return JSON only, with this shape. Extra property columns may also appear in eac
       "P&ID": "",
       "MATERIAL OF CONSTRUCTION": "",
       "CONFIGURATION": "",
+      "ORIENTATION",
       "LOCATION": "",
       "OPERATING PRESSURE": "",
       "OPERATING TEMPERATURE": "",
