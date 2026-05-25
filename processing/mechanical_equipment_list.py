@@ -207,8 +207,11 @@ BLANK / DASH VALUE RULE
 
 DIMENSION/DUTY ROW RULE
 - If a source row/property is "DIMENSION/DUTY", decide by the value content:
-  - Map to dimension columns if the value contains dimension indicators such as "mm", "m", "ID", "I/D", "OD", "O/D", "D", "T/T", "S/F", "F/F", "dia", "diameter", or dimension-style patterns like "950 (I/D) X 1800 (T/T)".
-  - Map to "DUTY" if the value contains duty units or duty-like values or no dimension indicators.
+  - Map to dimension columns if the value contains dimension indicators such as "mm", "ID", "I/D", "OD", "O/D", "D", "T/T", "S/F", "diameter", or dimension-style patterns like "950 (I/D) X 1800 (T/T)".
+  - Map to "DUTY" if the value contains no dimension indicators. 
+  Examples:
+  -  429.2 
+  -  416.3 (NOTE-1)
 - For dimension values, apply the existing Dimension Mapping Rules.
 - For duty values, keep the value concise and place it only in "DUTY".
 
