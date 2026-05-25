@@ -30,7 +30,7 @@ st.set_page_config(page_title="P&ID Table Info Fetcher", layout="wide")
 st.title("Get P&ID Table Equipment Details 📋")
 
 st.caption(
-    "Upload one or more P&ID PDFs, and extract the equipments details from the tables.\n"
+    "Upload one or more P&ID PDFs, and extract the equipments details from the tables.\n\n"
     "(Upload < 10 PDFs at a time for best results)"
 )
 
