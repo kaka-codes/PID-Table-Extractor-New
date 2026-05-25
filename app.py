@@ -31,6 +31,7 @@ st.title("Get P&ID Table Equipment Details 📋")
 
 st.caption(
     "Upload one or more P&ID PDFs, and extract the equipments details from the tables."
+    "(Upload < 10 PDFs at a time for best results)"
 )
 
 st.markdown(
