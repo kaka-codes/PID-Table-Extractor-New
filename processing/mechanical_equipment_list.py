@@ -159,78 +159,72 @@ Input JSON:
 {payload_json}
 
 Instructions:
-- The input JSON may come from either:
-  1. a structured equipment extraction with an "equipment" list, or
-  2. an OCR extraction with a "matched_rows" list of row-wise key/value data.
-- If the input contains an "equipment" list, create one output row per item in the "equipment" list.
-- If the input contains a "matched_rows" list, interpret the OCR rows carefully and infer the Mechanical Equipment List row or rows from that content.
-- For OCR-based inputs, split multi-value rows into separate equipment rows only when the grouping is reasonably clear from the extracted values; otherwise return the best single row or rows you can infer and leave uncertain fields empty.
-- Use document-level fields like document_title, source_file, revision_number, document_numbers, page_number, table_number, and split_number when helpful.
-- Put units inside the values, not in the headers.
-- For temperature values, normalize OCR/unit variants like "OC", "0C", "oC", "Oc", and similar forms to the proper unit symbol "°C".
-- If '(1 × 100%)', '(2 × 100%)', '(3 × 33%)', etc. kind of % values are present in "DESCRIPTION", "EQUIPMENT TYPE", "PRODUCT/ SERVICE" properties then understand that those % values should be put in the "CONFIGURATION" column.
-- If the words 'Vertical' or 'Horizontal' are present in "DESCRIPTION", "EQUIPMENT TYPE", "PRODUCT/ SERVICE" properties then understand that 'vertical' or 'horizontal' should be put in the "ORIENTATION" column
-- If there's a spelling mistake in some property (column headers) understand that and put its value under the correct column header.
-  Example:
-  - 'Diffrntial Pressure' means 'Differential Pressure'
-  - 'Dimmension' or 'Dimennsion' means 'Dimension'
-- If a 'Material of Construction' value starts with a term 'Hell' understand that 'S' got cut out and replace that term with 'Shell'.
-- First try to map each property into the existing Mechanical Equipment List headers.
-- If a source property does not fit any existing header, create an additional concise business-ready column for that property, but without units, those units need to be appended to the values.
-- Any additional column must use only the property name as the header (no units).
-- Do not put the unit in the header; keep the unit in the value.
-- Keep the standard Mechanical Equipment List headers unchanged.
-- Do not change the order of the columns.
-- You may add extra property columns when needed, but all additional columns must be inserted without units (units get appended to the values) and before the following fixed columns:
-  "DRY WT (each)",
-  "OPE WT (each)",
-  "DRY WT (total)",
-  "OPE WT (total)",
-  and "REMARKS".
-- These last five columns must always remain present at the end of the table and must always remain empty.
-- If there is a property specifically as Motor Duty then that value should be put in the "MOTOR DUTY" column. Else put rest other Duty in the 'DUTY' column. 
-- No units should be present in the column headers.
-- Units should get appended to the values if needed.
-- If a value is missing or uncertain, return an empty string for that field.
-- "CONTRACTOR EQUIPMENT TAG NO." should usually come from item/equipment tag or item number identifiers.
-- "P&ID" should be populated only from document_numbers whenever document_numbers is available.
+You convert input JSON into a Mechanical Equipment List table.
+
+INPUT TYPES
+- If JSON has "equipment": create one output row per equipment item.
+- If JSON has "matched_rows": interpret OCR row-wise key/value data and infer equipment row(s).
+- For OCR inputs, split into multiple equipment rows only when grouping is clear. Otherwise return the best inferred row(s) and leave uncertain fields blank.
+
+GENERAL RULES
+- Map source properties to existing Mechanical Equipment List headers first.
+- Correct obvious header spelling mistakes before mapping.
+  Examples:
+  - "Diffrntial Pressure" → "Differential Pressure"
+  - "Dimmension"/"Dimennsion" → "Dimension"
+- If a property does not fit any existing header, add a concise business-ready column using only the property name.
+- Do not put units in any column header. Append units to values instead.
+- Keep standard Mechanical Equipment List headers unchanged and in the same order.
+- Additional columns must be inserted before:
+  "DRY WT (each)", "OPE WT (each)", "DRY WT (total)", "OPE WT (total)", "REMARKS".
+- These five columns must always remain at the end and always be blank:
+  "DRY WT (each)", "OPE WT (each)", "DRY WT (total)", "OPE WT (total)", "REMARKS".
+- Never infer, calculate, estimate, or populate these five columns, even if weight-related data exists.
+- Missing or uncertain values must be "".
 - Keep values concise and business-ready.
 
-IMPORTANT RULES FOR THE FOLLOWING COLUMNS:
-- "DRY WT (each)" must ALWAYS remain blank.
-- "OPE WT (each)" must ALWAYS remain blank.
-- "DRY WT (total)" must ALWAYS remain blank.
-- "OPE WT (total)" must ALWAYS remain blank.
-- "REMARKS" must ALWAYS remain blank.
-- Never infer, calculate, estimate, or populate values for these five columns even if the source data contains related information.
+DOCUMENT FIELDS
+- Use document-level fields when helpful:
+  document_title, source_file, revision_number, document_numbers, page_number, table_number, split_number.
+- Populate "P&ID" only from document_numbers when document_numbers is available.
+- "CONTRACTOR EQUIPMENT TAG NO." should usually come from item/equipment tag or item number identifiers.
 
-Dimension Mapping Rules:
-- If dimension text contains identifiers like:
-  "ID", "I/D", "OD", "O/D", or "D",
-  then extract that value and place it into the "W or ID" column.
+VALUE NORMALIZATION
+- Normalize temperature unit variants like "OC", "0C", "oC", "Oc" to "°C".
+- If "Material of Construction" starts with "Hell", replace only that term with "Shell".
+- If DESCRIPTION, EQUIPMENT TYPE, or PRODUCT/SERVICE contains values like "(1 × 100%)", "(2 × 100%)", "(3 × 33%)", put that value in "CONFIGURATION".
+- If DESCRIPTION, EQUIPMENT TYPE, or PRODUCT/SERVICE contains "Vertical" or "Horizontal", put it in "ORIENTATION".
+- If the property is specifically "Motor Duty", map it to "MOTOR DUTY".
+- Other duty values must go to "DUTY".
 
-- Preserve the identifier along with the value.
+BLANK / DASH VALUE RULE
+- If a source value is exactly "-" or only a dash-like placeholder, map it as "-" to the respective column.
+- Do not append any unit to dash-only values.
+  Example:
+  - Source: ABSORBED POWER (kw) : "-"  or  ABSORBED POWER : "-kw"
+  - Output: ABSORBED POWER : "-"
+  - Not: "- kw"
+
+DIMENSION/DUTY ROW RULE
+- If a source row/property is "DIMENSION/DUTY", decide by the value content:
+  - Map to dimension columns if the value contains dimension indicators such as "mm", "m", "ID", "I/D", "OD", "O/D", "D", "T/T", "S/F", "F/F", "dia", "diameter", or dimension-style patterns like "950 (I/D) X 1800 (T/T)".
+  - Map to "DUTY" if the value contains duty units or duty-like values or no dimension indicators.
+- For dimension values, apply the existing Dimension Mapping Rules.
+- For duty values, keep the value concise and place it only in "DUTY".
+
+DIMENSION MAPPING
+- If dimension text contains diameter identifiers "ID", "I/D", "OD", "O/D", or "D":
+  - Extract that value into "W or ID".
+  - Preserve identifier and unit.
+  - Example: "1700 mm (ID)", "812.8 mm (O/D)".
+- For the remaining non-diameter dimension:
+  - If ORIENTATION is Horizontal, map to "L or T/T".
+  - If ORIENTATION is Vertical, map to "H or T/T".
+  - If ORIENTATION is unclear, prefer "L or T/T" and leave "H or T/T" blank unless clearly vertical.
+- Preserve identifiers like "T/T", "S/F", "F/F" with the value.
   Examples:
-  - "1700 mm (ID)"
-  - "812.8 mm (O/D)"
-
-- For the remaining dimension value:
-  - If equipment ORIENTATION is Horizontal, place the value into "L or T/T".
-  - If equipment ORIENTATION is Vertical, place the value into "H or T/T".
-
-- Preserve associated identifiers such as:
-  "T/T", "S/F", "F/F", etc. together with the value.
-
-Examples:
-- "5500 mm (T/T)"
-- "1450 mm (S/F)"
-
-- If ORIENTATION is unavailable or unclear:
-  - Prefer mapping the remaining non-diameter dimension into "L or T/T".
-  - Leave "H or T/T" empty unless clearly vertical equipment data is present.
-
-- Keep all units inside the values.
-- Do not place units or identifiers in the column headers.
+  - "5500 mm (T/T)"
+  - "1450 mm (S/F)"
 
 Return JSON only, with this shape. Extra property columns may also appear in each row object when needed:
 {{
