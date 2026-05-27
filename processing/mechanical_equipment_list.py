@@ -196,6 +196,8 @@ VALUE NORMALIZATION
 - If DESCRIPTION, EQUIPMENT TYPE, or PRODUCT/SERVICE contains "Vertical" or "Horizontal", put it in "ORIENTATION".
 - If the property is specifically "Motor Duty", map it to "MOTOR DUTY".
 - Other duty values must go to "DUTY".
+- "Discharge Pressure" should be mapped to "OPERATING PRESSURE" .
+- "Working Temperature" should be mapped to "OPERATING TEMPERATURE" .
 
 BLANK / DASH VALUE RULE
 - If a source value is exactly "-" or only a dash-like placeholder, map it as "-" to the respective column.
