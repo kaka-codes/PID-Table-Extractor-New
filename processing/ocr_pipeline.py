@@ -21,7 +21,7 @@ from processing.adjacent_table_extractor import (
 )
 
 DEFAULT_RENDER_SCALE = 3
-DEFAULT_CLIP_WIDTH = 1500
+DEFAULT_CLIP_WIDTH = 1200
 DEFAULT_CLIP_HEIGHT = 500
 TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/-]*")
 
