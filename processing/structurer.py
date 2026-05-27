@@ -43,7 +43,7 @@ STOPWORDS = {
     "with",
 }
 EMPTY_MARKERS = {"", "none", "-"}
-PDFPLUMBER_FILE_SIZE_LIMIT = 100 * 1024
+PDFPLUMBER_FILE_SIZE_LIMIT = 600 * 1024
 
 
 def _normalize_value(value) -> str:
