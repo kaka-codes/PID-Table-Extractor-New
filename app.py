@@ -1957,6 +1957,8 @@ if documents:
                                 "This table matched the condition, but no structured section was produced after cleaning."
                             )
 
+            document_key_text = str(document_key).replace(" ", "_").replace("/", "_").replace("\\", "_")                
+
             st.download_button(
                 "Download extracted JSON",
                 data=json.dumps(document, indent=2),
