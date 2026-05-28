@@ -954,7 +954,7 @@ from processing.adjacent_table_extractor import (
 DEFAULT_RENDER_SCALE = 3
 # OCR should scan the full top band of the PDF from left to right.
 # Height is still limited so OCR focuses only on the top/header area.
-DEFAULT_TOP_CLIP_HEIGHT = 400
+DEFAULT_TOP_CLIP_HEIGHT = 800
 TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/-]*")
 
 # ============================================
