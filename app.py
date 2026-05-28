@@ -1962,7 +1962,7 @@ if documents:
                 data=json.dumps(document, indent=2),
                 file_name=f"{Path(metadata['source_file']).stem}_table_qa.json",
                 mime="application/json",
-                key=f"download-{metadata['source_file']}",
+                key=f"download-{document_key_text}",
                 use_container_width=True,
             )
 
