@@ -32,6 +32,7 @@ def extract_tables_perfectly(pdf_source) -> List[Dict[str, Any]]:
 
                 df = pd.DataFrame(table)
                 df = clean_level_logic(df)
+                df = clean_flare_logic(df)
                 if df.empty:
                     continue
 
