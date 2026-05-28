@@ -4,7 +4,8 @@ from typing import Any, Dict, List
 import pandas as pd
 import pdfplumber
 
-from processing.cleaner import clean_level_logic
+from processing.cleaner import clean_level_logic  
+from processing.cleaner import clean_flare_logic
 
 DEFAULT_TABLE_SETTINGS = {
     "vertical_strategy": "lines",
