@@ -96,6 +96,40 @@ def clean_level_logic(df):
 
     return df
 
+def clean_flare_logic(df):
+    if df is None or df.empty:
+        return df
+
+    flare_col_index = None
+    keyword_col_index = None
+    flare_row_index = None
+
+    for index, col in enumerate(df.columns):
+        col_text = " ".join(df[col].astype(str)).lower()
+
+        if any(keyword in col_text for keyword in KEYWORDS):
+            keyword_col_index = index
+            break
+
+    for index, col in enumerate(df.columns):
+        for row_idx, value in enumerate(df[col].astype(str)):
+            if "flare" in value.lower():
+                flare_col_index = index
+                flare_row_index = row_idx
+                break
+
+        if flare_col_index is not None:
+            break
+
+    if flare_col_index is not None:
+        if keyword_col_index == flare_col_index:
+            return df.iloc[:flare_row_index, :]
+
+        return df.iloc[:, :flare_col_index]
+
+    return df
+
+
 
 def clean_df(df):
     if df is None or df.empty:
