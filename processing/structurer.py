@@ -430,7 +430,7 @@ def build_table_document(pdf_bytes: bytes, filename: str) -> Dict[str, Any]:
     #     )
 
     if matched_preview_count == 0:
-    adjacent_table_result = {
+        adjacent_table_result = {
         "ok": False,
         "status": "no_condition_matching_tables",
         "data": {},
