@@ -363,48 +363,113 @@ def build_table_document(pdf_bytes: bytes, filename: str) -> Dict[str, Any]:
             if matches_conditions:
                 matched_preview_count += 1
 
-    selected_table = None
-    for extracted_table in extracted_tables[:5]:
-        if is_valid_table(extracted_table["dataframe"]):
-            selected_table = extracted_table
-            break
+#     selected_table = None
+#     for extracted_table in extracted_tables[:5]:
+#         if is_valid_table(extracted_table["dataframe"]):
+#             selected_table = extracted_table
+#             break
 
-    candidate_tables = [selected_table] if selected_table is not None else []
+#     candidate_tables = [selected_table] if selected_table is not None else []
+#     Select only tables/splits that actually match the required keyword conditions.
+# This prevents the app from choosing the first "valid" table that is not the equipment table.
+    candidate_tables = []
+    
+    for extracted_table in extracted_tables:
+        dataframe = extracted_table["dataframe"]
+        prepared_df = prepare_table(dataframe)
+    
+        if prepared_df is None or prepared_df.empty:
+            continue
+    
+        keyword_cols = get_keyword_columns(prepared_df, KEYWORDS)
+    
+        if len(keyword_cols) <= 1:
+            split_dfs = [prepared_df]
+        else:
+            split_dfs = split_tables(prepared_df, keyword_cols)
+    
+        for split_index, split_df in enumerate(split_dfs, start=1):
+            table_df = clean_rows(split_df)
+    
+            if table_df is None or table_df.empty:
+                continue
+    
+            table_df = apply_keyword_fill_logic(table_df)
+    
+            if table_df is None or table_df.empty:
+                continue
+    
+            condition_matches = find_table_keyword_matches(table_df, KEYWORDS)
+    
+            if condition_matches:
+                candidate_tables.append(
+                    {
+                        "page_number": extracted_table["page_number"],
+                        "table_number": extracted_table["table_number"],
+                        "split_number": split_index,
+                        "dataframe": table_df,
+                        "original_dataframe": dataframe,
+                        "condition_matches": condition_matches,
+                    }
+                )
     adjacent_table_result: Dict[str, Any] = {"ok": False, "status": "not_run", "data": {}}
 
+    # if matched_preview_count == 0:
+    #     adjacent_table_result = {
+    #         "ok": False,
+    #         "status": "no_condition_matching_tables",
+    #         "data": {},
+    #     }
+    # elif selected_table is None:
+    #     adjacent_table_result = {"ok": False, "status": "selected_table_not_found", "data": {}}
+    # else:
+    #     adjacent_table_result = extract_required_data_from_next_source_table(
+    #         pdf_bytes=pdf_bytes,
+    #         source_page_number=selected_table["page_number"],
+    #         source_table_number=selected_table["table_number"],
+    #     )
+
     if matched_preview_count == 0:
+    adjacent_table_result = {
+        "ok": False,
+        "status": "no_condition_matching_tables",
+        "data": {},
+        }
+    elif not candidate_tables:
         adjacent_table_result = {
             "ok": False,
-            "status": "no_condition_matching_tables",
+            "status": "condition_matching_table_not_found_after_cleaning",
             "data": {},
         }
-    elif selected_table is None:
-        adjacent_table_result = {"ok": False, "status": "selected_table_not_found", "data": {}}
     else:
+        first_candidate_table = candidate_tables[0]
+    
         adjacent_table_result = extract_required_data_from_next_source_table(
             pdf_bytes=pdf_bytes,
-            source_page_number=selected_table["page_number"],
-            source_table_number=selected_table["table_number"],
+            source_page_number=first_candidate_table["page_number"],
+            source_table_number=first_candidate_table["table_number"],
         )
-
     tables = []
     chunks = []
     chunk_number = 1
     equipment_count = 0
 
     for extracted_table in candidate_tables:
-        prepared_df = prepare_table(extracted_table["dataframe"])
-        if prepared_df is None or prepared_df.empty:
-            continue
+        # prepared_df = prepare_table(extracted_table["dataframe"])
+        # if prepared_df is None or prepared_df.empty:
+        #     continue
 
-        keyword_cols = get_keyword_columns(prepared_df, KEYWORDS)
-        if len(keyword_cols) <= 1:
-            split_dfs = [prepared_df]
-        else:
-            split_dfs = split_tables(prepared_df, keyword_cols)
+        # keyword_cols = get_keyword_columns(prepared_df, KEYWORDS)
+        # if len(keyword_cols) <= 1:
+        #     split_dfs = [prepared_df]
+        # else:
+        #     split_dfs = split_tables(prepared_df, keyword_cols)
 
-        for split_index, split_df in enumerate(split_dfs, start=1):
-            table_df = clean_rows(split_df)
+        # for split_index, split_df in enumerate(split_dfs, start=1):
+        #     table_df = clean_rows(split_df)
+        for extracted_table in candidate_tables:
+            table_df = extracted_table["dataframe"]
+            split_index = extracted_table.get("split_number")
             if table_df is None or table_df.empty:
                 continue
             table_df = apply_keyword_fill_logic(table_df)
